@@ -3,46 +3,51 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load model with caching
-@st.cache_resource
+# Page title
+st.title("SHL Assessment Recommender")
+
+# Load the sentence transformer model without cache
+@st.cache_resource(show_spinner=False)
 def load_model():
-    return SentenceTransformer('all-MiniLM-L6-v2')
+    try:
+        model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
+        return model
+    except Exception as e:
+        st.error("Error loading the model. Please check your internet connection or model name.")
+        st.stop()
 
 model = load_model()
 
-# Load SHL dataset
-@st.cache_data
-def load_data():
-    df = pd.read_csv("shl_assessments.csv")
-    return df
+# Sample SHL test descriptions
+shl_tests = {
+    "Deductive Reasoning": "Test your ability to apply general rules to specific problems.",
+    "Inductive Reasoning": "Measure how well you can identify patterns and logical rules.",
+    "Numerical Reasoning": "Assess your ability to interpret, analyze and draw conclusions from numerical data.",
+    "Verbal Reasoning": "Evaluate how well you understand and reason using concepts framed in words.",
+    "Situational Judgment": "Understand how you might behave in work-related situations.",
+    "Personality Questionnaire": "Explore your personality traits and behavioral preferences.",
+    "General Ability": "A mix of numerical, verbal, and logical reasoning skills.",
+    "Mechanical Comprehension": "Test your understanding of mechanical and physical concepts."
+}
 
-df = load_data()
+# Convert test descriptions to a DataFrame
+test_df = pd.DataFrame(list(shl_tests.items()), columns=["Test Name", "Description"])
 
-# Streamlit UI
-st.title("🔍 SHL Assessment Recommender")
-st.markdown("Enter your interests or career goals, and we'll recommend the best SHL assessments for you.")
+# Input: User's interest/skill
+user_input = st.text_area("Describe your interests or strengths:", "")
 
-# User input
-user_input = st.text_area("What are your career interests?", height=150)
-
-if st.button("Get Recommendations"):
-    if not user_input.strip():
-        st.warning("Please enter your interests before clicking the button.")
+if st.button("Recommend SHL Tests"):
+    if user_input.strip() == "":
+        st.warning("Please enter some text describing your interests or strengths.")
     else:
-        # Encode user input and dataset
-        user_embedding = model.encode([user_input])
-        assessment_embeddings = model.encode(df['assessment'], show_progress_bar=True)
+        # Embed input and test descriptions
+        with st.spinner("Finding the best match..."):
+            user_embedding = model.encode([user_input])
+            test_embeddings = model.encode(test_df["Description"].tolist())
 
-        # Calculate similarity
-        similarity_scores = cosine_similarity(user_embedding, assessment_embeddings)[0]
+            # Calculate cosine similarity
+            similarities = cosine_similarity(user_embedding, test_embeddings)[0]
+            test_df["Similarity"] = similarities
 
-        # Add similarity to dataframe and sort
-        df['score'] = similarity_scores
-        top_matches = df.sort_values(by='score', ascending=False).head(5)
-
-        # Show results
-        st.subheader("Top SHL Assessment Recommendations:")
-        for idx, row in top_matches.iterrows():
-            st.markdown(f"**{row['assessment']}**")
-            st.markdown(f"{row['description']}")
-            st.markdown("---")
+            # Sort and display top 3 recommendations
+            top_matches_
