@@ -1,0 +1,12 @@
+Assessment Name,Description,URL,Remote Testing Support,Adaptive/IRT Support,Duration,Test Type
+Numerical Reasoning Test,Assesses ability to interpret and analyze numerical data,https://www.shl.com/numerical-reasoning,Yes,Yes,20-25 minutes,Cognitive Ability
+Verbal Reasoning Test,Measures comprehension and reasoning based on written content,https://www.shl.com/verbal-reasoning,Yes,Yes,20-25 minutes,Cognitive Ability
+Logical Reasoning Test,Evaluates problem-solving using logical sequences and patterns,https://www.shl.com/logical-reasoning,Yes,Yes,15-20 minutes,Cognitive Ability
+Situational Judgement Test,Assesses judgement in workplace scenarios,https://www.shl.com/sjt,Yes,No,25-30 minutes,Behavioral/Workplace Judgment
+Personality Questionnaire,Measures behavioral preferences and personality traits,https://www.shl.com/personality,Yes,No,20-30 minutes,Personality
+Motivation Questionnaire,Identifies motivators and job engagement factors,https://www.shl.com/motivation,Yes,No,30 minutes,Motivation
+General Ability Test,"Combines numerical, verbal, and logical abilities in one test",https://www.shl.com/general-ability,Yes,Yes,30 minutes,Cognitive Ability
+Inductive Reasoning Test,Assesses ability to identify patterns and solve problems,https://www.shl.com/inductive-reasoning,Yes,Yes,15-20 minutes,Cognitive Ability
+Deductive Reasoning Test,Assesses ability to draw logical conclusions,https://www.shl.com/deductive-reasoning,Yes,Yes,15-20 minutes,Cognitive Ability
+Mechanical Comprehension Test,Measures understanding of mechanical and physical concepts,https://www.shl.com/mechanical-comprehension,Yes,No,20-25 minutes,Technical Aptitude
+Occupational Personality Questionnaire (OPQ),Provides detailed insight into personality traits for workplace fit,https://www.shl.com/opq,Yes,No,25-40 minutes,Personality
