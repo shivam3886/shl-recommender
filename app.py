@@ -7,8 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1bWAPyWoCeQodD_T9xiimgk7F5hO52knT
 """
 
-!pip install -q sentence-transformers
-
 import os
 
 # Create the project folder
