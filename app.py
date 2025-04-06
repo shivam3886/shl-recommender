@@ -44,7 +44,6 @@ import pandas as pd
 df = pd.read_csv("/content/shl_recommender/shl_assessments_sample.csv")
 df.head()
 
-!pip install sentence-transformers
 
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
