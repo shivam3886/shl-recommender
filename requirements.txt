@@ -1,5 +1,6 @@
 pandas
 scikit-learn
-sentence-transformers
 streamlit
 sentence-transformers==2.2.2
+huggingface-hub==0.20.3
+torch
