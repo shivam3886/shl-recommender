@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 # Load CSV file once (assumes it's in the same directory as this script)
 @st.cache_data
 def load_data():
-    return pd.read_csv("shl_assessments_sample.csv")
+    return pd.read_csv("shl_assessments.csv")
 
 # Load the model once
 @st.cache_resource
