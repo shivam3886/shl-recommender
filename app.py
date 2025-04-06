@@ -1,43 +1,48 @@
 import streamlit as st
 import pandas as pd
-import torch
 from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
-# Load CSV file once (assumes it's in the same directory as this script)
-@st.cache_data
-def load_data():
-    return pd.read_csv("shl_assessments.csv")
-
-# Load the model once
+# Load model with caching
 @st.cache_resource
 def load_model():
     return SentenceTransformer('all-MiniLM-L6-v2')
 
-# Load everything
-df = load_data()
 model = load_model()
 
-# Generate embeddings if not already present
+# Load SHL dataset
 @st.cache_data
-def generate_embeddings(df):
-    df['embedding'] = df['Description'].apply(lambda x: model.encode(x, convert_to_tensor=True))
+def load_data():
+    df = pd.read_csv("shl_assessments.csv")
     return df
 
-df = generate_embeddings(df)
+df = load_data()
 
-def recommend_assessments(query, top_k=5):
-    query_embedding = model.encode(query, convert_to_tensor=True)
-    similarities = [torch.nn.functional.cosine_similarity(query_embedding, emb, dim=0).item() for emb in df['embedding']]
-    top_indices = sorted(range(len(similarities)), key=lambda i: similarities[i], reverse=True)[:top_k]
-    return df.iloc[top_indices][['Assessment Name', 'URL']]
-
-# Streamlit interface
+# Streamlit UI
 st.title("🔍 SHL Assessment Recommender")
+st.markdown("Enter your interests or career goals, and we'll recommend the best SHL assessments for you.")
 
-user_query = st.text_input("Enter job description or requirement:")
+# User input
+user_input = st.text_area("What are your career interests?", height=150)
 
-if user_query:
-    recommendations = recommend_assessments(user_query)
-    st.subheader("Top Recommended Assessments:")
-    for idx, row in recommendations.iterrows():
-        st.markdown(f"**{row['Assessment Name']}**  \n[Visit Assessment]({row['URL']})")
+if st.button("Get Recommendations"):
+    if not user_input.strip():
+        st.warning("Please enter your interests before clicking the button.")
+    else:
+        # Encode user input and dataset
+        user_embedding = model.encode([user_input])
+        assessment_embeddings = model.encode(df['assessment'], show_progress_bar=True)
+
+        # Calculate similarity
+        similarity_scores = cosine_similarity(user_embedding, assessment_embeddings)[0]
+
+        # Add similarity to dataframe and sort
+        df['score'] = similarity_scores
+        top_matches = df.sort_values(by='score', ascending=False).head(5)
+
+        # Show results
+        st.subheader("Top SHL Assessment Recommendations:")
+        for idx, row in top_matches.iterrows():
+            st.markdown(f"**{row['assessment']}**")
+            st.markdown(f"{row['description']}")
+            st.markdown("---")
