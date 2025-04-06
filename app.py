@@ -1,53 +1,53 @@
 import streamlit as st
-import pandas as pd
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer, util
 
-# Page title
-st.title("SHL Assessment Recommender")
+# SHL Tests and Descriptions
+shl_tests = {
+    "Cognitive Ability Test": "Measures problem-solving, logical reasoning, and analytical thinking.",
+    "Personality Questionnaire": "Evaluates traits like extraversion, conscientiousness, and emotional stability.",
+    "Situational Judgment Test": "Assesses judgment in work-related scenarios.",
+    "Numerical Reasoning Test": "Tests the ability to interpret and analyze numerical data.",
+    "Verbal Reasoning Test": "Assesses understanding and interpretation of written information.",
+    "Inductive Reasoning Test": "Measures ability to identify patterns and logical rules.",
+    "Deductive Reasoning Test": "Tests logical thinking using provided information.",
+    "Technical Test": "Evaluates specific technical skills required for a job.",
+    "Language Proficiency Test": "Measures reading, writing, listening, and speaking skills in a specific language.",
+    "Motivation Questionnaire": "Identifies what drives and motivates a candidate."
+}
 
-# Load the sentence transformer model without cache
+# Load model with error handling
 @st.cache_resource(show_spinner=False)
 def load_model():
     try:
-        model = SentenceTransformer('paraphrase-MiniLM-L3-v2')
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         return model
     except Exception as e:
-        st.error("Error loading the model. Please check your internet connection or model name.")
+        st.error(f"Error loading the model: {e}")
         st.stop()
 
 model = load_model()
 
-# Sample SHL test descriptions
-shl_tests = {
-    "Deductive Reasoning": "Test your ability to apply general rules to specific problems.",
-    "Inductive Reasoning": "Measure how well you can identify patterns and logical rules.",
-    "Numerical Reasoning": "Assess your ability to interpret, analyze and draw conclusions from numerical data.",
-    "Verbal Reasoning": "Evaluate how well you understand and reason using concepts framed in words.",
-    "Situational Judgment": "Understand how you might behave in work-related situations.",
-    "Personality Questionnaire": "Explore your personality traits and behavioral preferences.",
-    "General Ability": "A mix of numerical, verbal, and logical reasoning skills.",
-    "Mechanical Comprehension": "Test your understanding of mechanical and physical concepts."
-}
+# Streamlit App
+st.title("SHL Assessment Recommender")
 
-# Convert test descriptions to a DataFrame
-test_df = pd.DataFrame(list(shl_tests.items()), columns=["Test Name", "Description"])
-
-# Input: User's interest/skill
-user_input = st.text_area("Describe your interests or strengths:", "")
+user_input = st.text_area("Describe your interests or strengths:")
 
 if st.button("Recommend SHL Tests"):
-    if user_input.strip() == "":
-        st.warning("Please enter some text describing your interests or strengths.")
+    if not user_input.strip():
+        st.warning("Please enter a description of your interests or strengths.")
     else:
-        # Embed input and test descriptions
-        with st.spinner("Finding the best match..."):
-            user_embedding = model.encode([user_input])
-            test_embeddings = model.encode(test_df["Description"].tolist())
+        user_embedding = model.encode(user_input, convert_to_tensor=True)
+        results = []
 
-            # Calculate cosine similarity
-            similarities = cosine_similarity(user_embedding, test_embeddings)[0]
-            test_df["Similarity"] = similarities
+        for test, description in shl_tests.items():
+            test_embedding = model.encode(description, convert_to_tensor=True)
+            similarity = util.pytorch_cos_sim(user_embedding, test_embedding).item()
+            results.append((test, description, similarity))
 
-            # Sort and display top 3 recommendations
-            top_matches_
+        results.sort(key=lambda x: x[2], reverse=True)
+
+        st.subheader("Top SHL Tests Recommended:")
+        for test, description, score in results[:3]:
+            st.markdown(f"### {test}")
+            st.write(description)
+            st.caption(f"Similarity Score: {score:.2f}")
